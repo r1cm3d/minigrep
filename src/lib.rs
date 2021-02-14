@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs;
 
+#[derive(Debug)]
 pub struct Config {
     pub query: String,
     pub filename: String,
@@ -16,6 +17,12 @@ impl Config {
         let filename = args[2].clone();
 
         Ok(Config { query, filename })
+    }
+}
+
+impl PartialEq for Config {
+    fn eq(&self, other: &Self) -> bool {
+        self.query == other.query && self.filename == other.filename
     }
 }
 
@@ -54,5 +61,20 @@ safe, fast, productive.
 Pick three.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents))
+    }
+
+    #[test]
+    fn config_new() {
+        let args1 = &[String::from("minigrep"), String::from("query"), String::from("filename")][..];
+        let args2 = &[String::from("filename")][..];
+        let cases = vec![("ok", args1, Ok(Config{ query: String::from("query"), filename: String::from("filename")})),
+                         ("error", args2, Err("not enough arguments"))];
+
+        for case in cases {
+            let act = Config::new(&case.1);
+            let exp = case.2;
+
+            assert_eq!(act, exp)
+        }
     }
 }
